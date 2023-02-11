@@ -4,21 +4,25 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"fmt"
 	"log"
 	"net"
 	"time"
 
 	"github.com/Speshl/GoRemoteControl/models"
+	"go.bug.st/serial"
 	"golang.org/x/sync/errgroup"
 )
 
 type Server struct {
-	address string
+	address    string
+	serialPort *string
 }
 
-func NewServer(address string) *Server {
+func NewServer(address string, serialPort *string) *Server {
 	return &Server{
-		address: address,
+		address:    address,
+		serialPort: serialPort,
 	}
 }
 
@@ -104,6 +108,31 @@ func (s *Server) startStateSyncer(ctx context.Context, errGroup *errgroup.Group,
 func (s *Server) startRFWriter(ctx context.Context, errGroup *errgroup.Group, latestState *LatestState) error {
 	ticker := time.NewTicker(1000 * time.Millisecond) //RF Update rate
 	errGroup.Go(func() error {
+
+		ports, err := serial.GetPortsList()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if len(ports) == 0 {
+			log.Fatal("No serial ports found!")
+		}
+		for _, port := range ports {
+			log.Printf("Found port: %v\n", port)
+		}
+
+		mode := &serial.Mode{
+			BaudRate: 115200,
+		}
+
+		portName := ports[0]
+		if s.serialPort != nil {
+			portName = *s.serialPort
+		}
+		port, err := serial.Open(portName, mode)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -115,23 +144,26 @@ func (s *Server) startRFWriter(ctx context.Context, errGroup *errgroup.Group, la
 					continue
 				}
 				log.Printf("State: %+v\n", state.GetBytes())
+				_, err = port.Write(state.GetBytes())
+				if err != nil {
+					return err
+				}
 			}
 		}
 	})
 	return nil
 }
 
-/*
-func (s *Server) processPacket(packet models.Packet) error {
-	switch packet.StateType {
-	case controllers.ControlSchemaGround:
-		select {
-			case messages <- msg
-		}
-		//groundState := packet.State.(controllers.GroundState)
-	default:
-		log.Println("failed to determing state type")
+func GetSerialDevices() error {
+	ports, err := serial.GetPortsList()
+	if err != nil {
+		return err
+	}
+	if len(ports) == 0 {
+		return fmt.Errorf("no serial ports found!")
+	}
+	for _, port := range ports {
+		log.Printf("Found port: %v\n", port)
 	}
 	return nil
 }
-*/

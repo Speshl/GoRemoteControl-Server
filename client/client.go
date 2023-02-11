@@ -38,7 +38,7 @@ func (c *Client) RunClient() error {
 	}
 	defer conn.Close()
 
-	joySticks, err := c.getJoysticks()
+	joySticks, err := GetJoysticks()
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (c *Client) RunClient() error {
 	}
 }
 
-func (c *Client) getJoysticks() ([]joystick.Joystick, error) {
+func GetJoysticks() ([]joystick.Joystick, error) {
 	joySticks := make([]joystick.Joystick, 0)
 
 	for i := 0; i < 10; i++ {

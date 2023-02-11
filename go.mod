@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/0xcafed00d/joystick v1.0.1
 	github.com/tidwall/gjson v1.14.4
+	go.bug.st/serial v1.5.0
 	golang.org/x/sync v0.1.0
 )
 
@@ -14,6 +15,7 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
 	github.com/abice/go-enum v0.5.5 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/creack/goselect v0.1.2 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
