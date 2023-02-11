@@ -1,0 +1,97 @@
+{
+    "schema": "ground",
+    "mapping":{
+        "steer": {
+            "deviceID": 0,
+            "inputType": 1,
+            "inputID": 0
+
+        },
+        "gas": {
+            "deviceID": 0,
+            "inputType": 1,
+            "inputID": 2,
+            "inverted": true
+
+        },
+        "brake": {
+            "deviceID": 0,
+            "inputType": 1,
+            "inputID": 3,
+            "inverted": true
+
+        },
+        "clutch": {
+            "deviceID": 0,
+            "inputType": 1,
+            "inputID": 4,
+            "inverted": true
+
+        },
+        "handbrake": {
+            "deviceID": 0,
+            "inputType": 1,
+            "inputID": 5
+
+        },
+        "gears":[
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 8
+            },
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 9
+            },
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 10
+            },
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 11
+            },
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 12
+            },
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 13
+            },
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 14
+            }
+        ],
+        "aux":[
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 1
+            },
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 2
+            },
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 3
+            },
+            {
+                "deviceID": 0,
+                "inputType": 2,
+                "inputID": 4
+            }
+        ]
+    }
+}
