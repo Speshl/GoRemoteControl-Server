@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/gob"
 	"fmt"
 	"log"
@@ -26,7 +27,9 @@ func NewClient(address string, cfgPath string) *Client {
 	return &client
 }
 
-func (c *Client) RunClient() error {
+func (c *Client) RunClient(ctx context.Context) error {
+	defer log.Println("Client Closing")
+
 	udpServer, err := net.ResolveUDPAddr("udp", ":1053")
 	if err != nil {
 		return err
@@ -53,30 +56,35 @@ func (c *Client) RunClient() error {
 		return err
 	}
 	log.Println("Start Sending...")
+	ticker := time.NewTicker(10 * time.Millisecond) //RF Update rate
 	for {
-		state, err := controller.GetUpdatedState()
-		if err != nil {
-			return fmt.Errorf("failed getting controller state- %w", err)
-		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			state, err := controller.GetUpdatedState()
+			if err != nil {
+				return fmt.Errorf("failed getting controller state- %w", err)
+			}
 
-		statePacket := models.Packet{
-			StateType: state.GetType(),
-			State:     state,
-			SentAt:    time.Now(),
+			statePacket := models.Packet{
+				StateType: state.GetType(),
+				State:     state,
+				SentAt:    time.Now(),
+			}
+			var buffer bytes.Buffer
+			encoder := gob.NewEncoder(&buffer)
+			gob.Register(models.GroundState{})
+			err = encoder.Encode(statePacket)
+			if err != nil {
+				return err
+			}
+			_, err = conn.Write(buffer.Bytes())
+			if err != nil {
+				return err
+			}
+			//log.Printf("%+v\n", state)
 		}
-		var buffer bytes.Buffer
-		encoder := gob.NewEncoder(&buffer)
-		gob.Register(models.GroundState{})
-		err = encoder.Encode(statePacket)
-		if err != nil {
-			return err
-		}
-		_, err = conn.Write(buffer.Bytes())
-		if err != nil {
-			return err
-		}
-		//log.Printf("%+v\n", state)
-		time.Sleep(10 * time.Millisecond)
 	}
 }
 

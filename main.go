@@ -17,7 +17,7 @@ func main() {
 	isServer := flag.Bool("server", true, "Run as UDP Server")
 	isClient := flag.Bool("client", true, "Run as UDP Client and Controller Reader")
 	udpPort := flag.String("port", "1053", "UDP Port")
-	serialPort := flag.String("device", "", "Serial device")
+	serialPort := flag.String("device", "COM3", "Serial device")
 	deviceCfg := flag.String("cfg", "./configs/g27.json", "Path to cfg json")
 
 	if listJoysticks != nil && *listJoysticks {
@@ -31,14 +31,14 @@ func main() {
 			log.Fatal(err)
 		}
 	} else {
-		errorGroup, _ := errgroup.WithContext(context.Background())
+		errorGroup, ctx := errgroup.WithContext(context.Background())
 		if isClient != nil && *isClient {
 			c := client.NewClient(":"+*udpPort, *deviceCfg)
-			errorGroup.Go(c.RunClient)
+			errorGroup.Go(func() error { return c.RunClient(ctx) })
 		}
 		if isServer != nil && *isServer {
 			s := server.NewServer(":"+*udpPort, serialPort)
-			errorGroup.Go(s.RunServer)
+			errorGroup.Go(func() error { return s.RunServer(ctx) })
 		}
 		err := errorGroup.Wait()
 		if err != nil {

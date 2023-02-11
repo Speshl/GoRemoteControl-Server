@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"time"
 
 	"github.com/Speshl/GoRemoteControl/models"
@@ -26,13 +28,13 @@ func NewServer(address string, serialPort *string) *Server {
 	}
 }
 
-func (s *Server) RunServer() error {
+func (s *Server) RunServer(ctx context.Context) error {
 	log.Println("Starting Controller Server...")
 
-	errGroup, ctx := errgroup.WithContext(context.Background())
+	errGroup, ctx := errgroup.WithContext(ctx)
 	stateChannel := s.startUDPListener(ctx, errGroup)
 	latestState := s.startStateSyncer(ctx, errGroup, stateChannel)
-	s.startRFWriter(ctx, errGroup, latestState)
+	s.startSerialWriter(ctx, errGroup, latestState)
 
 	err := errGroup.Wait()
 	if err != nil {
@@ -44,7 +46,6 @@ func (s *Server) RunServer() error {
 func (s *Server) startUDPListener(ctx context.Context, errGroup *errgroup.Group) chan models.StateIface {
 	returnChannel := make(chan models.StateIface, 5)
 	errGroup.Go(func() error {
-		ctx := context.Background()
 		udpServer, err := net.ListenPacket("udp", s.address)
 		if err != nil {
 			return err
@@ -63,9 +64,12 @@ func (s *Server) startUDPListener(ctx context.Context, errGroup *errgroup.Group)
 				return ctx.Err()
 			default:
 				buffer := make([]byte, 512)
+				udpServer.SetDeadline(time.Now().Add(time.Second))
 				numRead, _, err := udpServer.ReadFrom(buffer)
 				if err != nil {
-					log.Printf("server read error: %s\n", err.Error())
+					if !errors.Is(err, os.ErrDeadlineExceeded) {
+						log.Printf("server read error: %s\n", err.Error())
+					}
 					continue
 				}
 				if numRead > 0 {
@@ -105,10 +109,10 @@ func (s *Server) startStateSyncer(ctx context.Context, errGroup *errgroup.Group,
 	return &returnMutex
 }
 
-func (s *Server) startRFWriter(ctx context.Context, errGroup *errgroup.Group, latestState *LatestState) error {
+func (s *Server) startSerialWriter(ctx context.Context, errGroup *errgroup.Group, latestState *LatestState) error {
 	ticker := time.NewTicker(1000 * time.Millisecond) //RF Update rate
 	errGroup.Go(func() error {
-
+		defer log.Println("Serial Writer Closing")
 		ports, err := serial.GetPortsList()
 		if err != nil {
 			log.Fatal(err)
@@ -143,8 +147,15 @@ func (s *Server) startRFWriter(ctx context.Context, errGroup *errgroup.Group, la
 					log.Println("skipping rf send - latest state already used")
 					continue
 				}
-				log.Printf("State: %+v\n", state.GetBytes())
-				_, err = port.Write(state.GetBytes())
+
+				if state == nil {
+					log.Println("got nil state")
+					continue
+				}
+
+				stateBytes := state.GetBytes()
+				log.Printf("State: %+v\n", stateBytes)
+				_, err = port.Write(stateBytes)
 				if err != nil {
 					return err
 				}
