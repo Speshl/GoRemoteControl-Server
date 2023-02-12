@@ -38,7 +38,7 @@ func (s *Server) RunServer(ctx context.Context) error {
 
 	err := errGroup.Wait()
 	if err != nil {
-		return err
+		return fmt.Errorf("server error: %w", err)
 	}
 	return nil
 }
@@ -132,6 +132,7 @@ func (s *Server) startSerialWriter(ctx context.Context, errGroup *errgroup.Group
 		if s.serialPort != nil {
 			portName = *s.serialPort
 		}
+		portName = "COM3" //TODO: REMOVE
 		port, err := serial.Open(portName, mode)
 		if err != nil {
 			log.Fatal(err)
@@ -157,8 +158,15 @@ func (s *Server) startSerialWriter(ctx context.Context, errGroup *errgroup.Group
 				log.Printf("State: %+v\n", stateBytes)
 				_, err = port.Write(stateBytes)
 				if err != nil {
-					return err
+					return fmt.Errorf("serial write error: %w", err)
 				}
+
+				readBytes := make([]byte, 7)
+				num, err := port.Read(readBytes)
+				if err != nil {
+					return fmt.Errorf("serial read error: %w", err)
+				}
+				log.Printf("Read %d bytes: %+v\n", num, readBytes)
 			}
 		}
 	})
