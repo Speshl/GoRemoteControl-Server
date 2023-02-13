@@ -69,6 +69,18 @@ func (c *Controller) mapGroundState() (models.StateIface, error) {
 		returnState.HandBrake = returnState.HandBrake * -1
 	}
 
+	returnState.Pan = states[cfg.Pan.DeviceID].AxisData[cfg.Pan.InputID]
+	if cfg.Pan.Inverted {
+		returnState.Pan = returnState.Pan * -1
+	}
+
+	returnState.Tilt = states[cfg.Tilt.DeviceID].AxisData[cfg.Tilt.InputID]
+	if cfg.Tilt.Inverted {
+		returnState.Tilt = returnState.Tilt * -1
+	}
+
+	returnState.NumGears = len(cfg.Gears) - 1 //Don't count reverse
+
 	for gear, gearButton := range cfg.Gears {
 		bitValue := uint32(math.Pow(2, float64(gearButton.InputID)))
 		//fmt.Printf("BitValue: %d\n", bitValue)

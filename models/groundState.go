@@ -1,6 +1,8 @@
 package models
 
-import "math"
+import (
+	"math"
+)
 
 type GroundState struct {
 	State
@@ -9,7 +11,10 @@ type GroundState struct {
 	Brake     int
 	Clutch    int
 	HandBrake int
+	Pan       int
+	Tilt      int
 	Gear      int
+	NumGears  int
 	Aux       [8]bool
 }
 
@@ -19,14 +24,59 @@ func (s GroundState) GetType() ControlSchema {
 
 func (s GroundState) GetBytes() []byte {
 	baseMin := -32768
-	basMax := 32768
-	returnBytes := make([]byte, 7)
-	returnBytes[0] = scaleToByte(s.Steer, baseMin, basMax)
-	returnBytes[1] = scaleToByte(s.Gas, baseMin, basMax)
-	returnBytes[2] = scaleToByte(s.Brake, baseMin, basMax)
-	returnBytes[3] = scaleToByte(s.Clutch, baseMin, basMax)
-	returnBytes[4] = scaleToByte(s.HandBrake, baseMin, basMax)
-	returnBytes[5] = byte(s.Gear)
+	baseMax := 32768
+	servoMin := byte(0)
+	servoMax := byte(180)
+	servoMid := servoMax / 2
+	returnBytes := make([]byte, 4)
+
+	returnBytes[0] = mapToRange(s.Steer, baseMin, baseMax, servoMin, servoMax) // steering
+	gasValue := mapToRange(s.Gas, baseMin, baseMax, servoMid, servoMax)
+	brakeValue := mapToRange(s.Brake*-1, baseMin, baseMax, servoMin, servoMid)
+	clutchValue := mapToRange(s.Clutch, baseMin, baseMax, servoMin, servoMax)
+
+	if brakeValue < servoMid {
+		returnBytes[1] = brakeValue
+	} else if gasValue > servoMid {
+		maxForGear := 90
+		switch s.Gear {
+		case 1:
+			maxForGear = int(servoMid) + 10
+		case 2:
+			maxForGear = int(servoMid) + 15
+		case 3:
+			maxForGear = int(servoMid) + 20
+		case 4:
+			maxForGear = int(servoMid) + 30
+		case 5:
+			maxForGear = int(servoMid) + 50
+		case 6:
+			maxForGear = int(servoMax)
+		default:
+			maxForGear = int(servoMid)
+		}
+
+		if gasValue > byte(maxForGear) {
+			returnBytes[1] = byte(maxForGear)
+		} else {
+			returnBytes[1] = gasValue
+		}
+	} else {
+		returnBytes[1] = servoMid
+	}
+
+	if clutchValue > 10 { //clutch overrides
+		returnBytes[1] = byte(servoMid)
+	}
+
+	panValue := mapToRange(s.Pan, baseMin, baseMax, 0, 127)
+	tiltValue := mapToRange(s.Tilt, baseMin, baseMax, 0, 127)
+	panAndTilt := (panValue << 4) | tiltValue
+	if panAndTilt > 255 {
+		returnBytes[2] = 255
+	} else {
+		returnBytes[2] = panAndTilt
+	}
 
 	var auxMask byte
 	for i, buttonOn := range s.Aux {
@@ -34,13 +84,12 @@ func (s GroundState) GetBytes() []byte {
 			auxMask += byte(math.Pow(2, float64(i)))
 		}
 	}
-	returnBytes[6] = auxMask
-
+	returnBytes[3] = auxMask
+	//log.Printf("State: %+v\n", s)
+	//log.Printf("StateBytes: %+v\n", returnBytes)
 	return returnBytes
 }
 
-func scaleToByte(value int, min int, max int) byte {
-	minAllowed := 0
-	maxAllowed := 254
-	return byte((maxAllowed-minAllowed)*(value-min)/(max-min) + minAllowed)
+func mapToRange(value int, min int, max int, minReturn byte, maxReturn byte) byte {
+	return byte(int(maxReturn-minReturn)*(value-min)/(max-min) + int(minReturn))
 }

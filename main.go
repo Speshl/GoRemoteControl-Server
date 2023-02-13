@@ -19,6 +19,7 @@ func main() {
 	udpPort := flag.String("port", "1053", "UDP Port")
 	serialPort := flag.String("device", "COM3", "Serial device")
 	deviceCfg := flag.String("cfg", "./configs/g27.json", "Path to cfg json")
+	baudRate := flag.Int("baudrate", 115200, "Serial baudrate")
 
 	if listJoysticks != nil && *listJoysticks {
 		_, err := client.GetJoysticks()
@@ -37,7 +38,7 @@ func main() {
 			errorGroup.Go(func() error { return c.RunClient(ctx) })
 		}
 		if isServer != nil && *isServer {
-			s := server.NewServer(":"+*udpPort, serialPort)
+			s := server.NewServer(":"+*udpPort, serialPort, baudRate)
 			errorGroup.Go(func() error { return s.RunServer(ctx) })
 		}
 		err := errorGroup.Wait()

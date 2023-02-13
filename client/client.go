@@ -30,7 +30,7 @@ func NewClient(address string, cfgPath string) *Client {
 func (c *Client) RunClient(ctx context.Context) error {
 	defer log.Println("Client Closing")
 
-	udpServer, err := net.ResolveUDPAddr("udp", ":1053")
+	udpServer, err := net.ResolveUDPAddr("udp", c.address)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (c *Client) RunClient(ctx context.Context) error {
 		return err
 	}
 	log.Println("Start Sending...")
-	ticker := time.NewTicker(10 * time.Millisecond) //RF Update rate
+	ticker := time.NewTicker(4 * time.Millisecond)
 	for {
 		select {
 		case <-ctx.Done():

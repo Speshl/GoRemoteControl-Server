@@ -36,11 +36,14 @@ type ConfigEntry struct {
 }
 
 type GroundConfig struct {
-	Steer     ConfigEntry   `json:"steer"`
-	Gas       ConfigEntry   `json:"gas"`
-	Brake     ConfigEntry   `json:"brake"`
-	Clutch    ConfigEntry   `json:"clutch"`
-	HandBrake ConfigEntry   `json:"handbrake"`
+	Steer     ConfigEntry `json:"steer"`
+	Gas       ConfigEntry `json:"gas"`
+	Brake     ConfigEntry `json:"brake"`
+	Clutch    ConfigEntry `json:"clutch"`
+	HandBrake ConfigEntry `json:"handbrake"`
+	Pan       ConfigEntry `json:"pan"`
+	Tilt      ConfigEntry `json:"tilt"`
+	NumGears  int
 	Gears     []ConfigEntry `json:"gears"`
 	Aux       []ConfigEntry `json:"aux"`
 }

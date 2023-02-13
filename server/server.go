@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Speshl/GoRemoteControl/models"
@@ -19,12 +20,14 @@ import (
 type Server struct {
 	address    string
 	serialPort *string
+	baudRate   *int
 }
 
-func NewServer(address string, serialPort *string) *Server {
+func NewServer(address string, serialPort *string, baudRate *int) *Server {
 	return &Server{
 		address:    address,
 		serialPort: serialPort,
+		baudRate:   baudRate,
 	}
 }
 
@@ -34,7 +37,7 @@ func (s *Server) RunServer(ctx context.Context) error {
 	errGroup, ctx := errgroup.WithContext(ctx)
 	stateChannel := s.startUDPListener(ctx, errGroup)
 	latestState := s.startStateSyncer(ctx, errGroup, stateChannel)
-	s.startSerialWriter(ctx, errGroup, latestState)
+	s.startSerial(ctx, errGroup, latestState)
 
 	err := errGroup.Wait()
 	if err != nil {
@@ -109,34 +112,24 @@ func (s *Server) startStateSyncer(ctx context.Context, errGroup *errgroup.Group,
 	return &returnMutex
 }
 
-func (s *Server) startSerialWriter(ctx context.Context, errGroup *errgroup.Group, latestState *LatestState) error {
-	ticker := time.NewTicker(1000 * time.Millisecond) //RF Update rate
+func (s *Server) startSerial(ctx context.Context, errGroup *errgroup.Group, latestState *LatestState) error {
+	errGroup.Go(func() error {
+		defer log.Println("Serial Reader and Writer Started")
+		serialPort, err := openSerialPort(s.serialPort, s.baudRate)
+		if err != nil {
+			return err
+		}
+		s.startSerialWriter(ctx, errGroup, &serialPort, latestState)
+		s.startSerialReader(ctx, errGroup, &serialPort)
+		return nil
+	})
+	return nil
+}
+
+func (s *Server) startSerialWriter(ctx context.Context, errGroup *errgroup.Group, serialPort *serial.Port, latestState *LatestState) error {
+	ticker := time.NewTicker(5 * time.Millisecond) //RF Update rate
 	errGroup.Go(func() error {
 		defer log.Println("Serial Writer Closing")
-		ports, err := serial.GetPortsList()
-		if err != nil {
-			log.Fatal(err)
-		}
-		if len(ports) == 0 {
-			log.Fatal("No serial ports found!")
-		}
-		for _, port := range ports {
-			log.Printf("Found port: %v\n", port)
-		}
-
-		mode := &serial.Mode{
-			BaudRate: 115200,
-		}
-
-		portName := ports[0]
-		if s.serialPort != nil {
-			portName = *s.serialPort
-		}
-		portName = "COM3" //TODO: REMOVE
-		port, err := serial.Open(portName, mode)
-		if err != nil {
-			log.Fatal(err)
-		}
 
 		for {
 			select {
@@ -155,22 +148,74 @@ func (s *Server) startSerialWriter(ctx context.Context, errGroup *errgroup.Group
 				}
 
 				stateBytes := state.GetBytes()
-				log.Printf("State: %+v\n", stateBytes)
-				_, err = port.Write(stateBytes)
+				numSent, err := (*serialPort).Write(stateBytes)
 				if err != nil {
 					return fmt.Errorf("serial write error: %w", err)
 				}
-
-				readBytes := make([]byte, 7)
-				num, err := port.Read(readBytes)
-				if err != nil {
-					return fmt.Errorf("serial read error: %w", err)
+				if numSent != len(stateBytes) {
+					log.Println("serial wrote wrong byte count")
 				}
-				log.Printf("Read %d bytes: %+v\n", num, readBytes)
 			}
 		}
 	})
 	return nil
+}
+
+func (s *Server) startSerialReader(ctx context.Context, errGroup *errgroup.Group, serialPort *serial.Port) error {
+	errGroup.Go(func() error {
+		defer log.Println("Serial Reader Closing")
+		for {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+				readBytes := make([]byte, 8096)
+				numRead, err := (*serialPort).Read(readBytes)
+				if err != nil {
+					return fmt.Errorf("serial read error: %w", err)
+				}
+				log.Printf("Serial RX (%d bytes): %s", numRead, strings.TrimSpace(string(readBytes)))
+			}
+		}
+	})
+	return nil
+}
+
+func openSerialPort(portParam *string, baudParam *int) (serial.Port, error) {
+	ports, err := serial.GetPortsList()
+	if err != nil {
+		return nil, err
+	}
+	if len(ports) == 0 {
+		return nil, fmt.Errorf("no serial ports found")
+	}
+	for _, port := range ports {
+		log.Printf("Found port: %v\n", port)
+	}
+
+	baudRate := 115200
+	if baudParam != nil {
+		baudRate = *baudParam
+	}
+
+	mode := &serial.Mode{
+		BaudRate: baudRate,
+	}
+
+	portName := ports[0]
+	paramFound := false
+	if portParam != nil {
+		for _, port := range ports {
+			if port == *portParam {
+				portName = port
+				paramFound = true
+			}
+		}
+		if !paramFound {
+			return nil, fmt.Errorf("specified serial port not found: %s", *portParam)
+		}
+	}
+	return serial.Open(portName, mode)
 }
 
 func GetSerialDevices() error {

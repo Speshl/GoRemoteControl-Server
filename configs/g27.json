@@ -34,6 +34,18 @@
             "inputID": 5
 
         },
+        "pan": {
+            "deviceID": 0,
+            "inputType": 1,
+            "inputID": 5
+
+        },
+        "tilt":{
+            "deviceID": 0,
+            "inputType": 1,
+            "inputID": 5
+
+        },
         "gears":[
             {
                 "deviceID": 0,
