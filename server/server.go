@@ -120,17 +120,16 @@ func (s *Server) startSerial(ctx context.Context, errGroup *errgroup.Group, late
 			return err
 		}
 		s.startSerialWriter(ctx, errGroup, &serialPort, latestState)
-		s.startSerialReader(ctx, errGroup, &serialPort)
+		//s.startSerialReader(ctx, errGroup, &serialPort)
 		return nil
 	})
 	return nil
 }
 
 func (s *Server) startSerialWriter(ctx context.Context, errGroup *errgroup.Group, serialPort *serial.Port, latestState *LatestState) error {
-	ticker := time.NewTicker(5 * time.Millisecond) //RF Update rate
+	ticker := time.NewTicker(30 * time.Millisecond) //RF Update rate
 	errGroup.Go(func() error {
 		defer log.Println("Serial Writer Closing")
-
 		for {
 			select {
 			case <-ctx.Done():
@@ -147,13 +146,11 @@ func (s *Server) startSerialWriter(ctx context.Context, errGroup *errgroup.Group
 					continue
 				}
 
-				stateBytes := state.GetBytes()
-				numSent, err := (*serialPort).Write(stateBytes)
+				triggerKey := []byte{255, 127} //prepended to data to keep in sync
+				stateBytes := append(triggerKey, state.GetBytes()...)
+				_, err = (*serialPort).Write(stateBytes)
 				if err != nil {
 					return fmt.Errorf("serial write error: %w", err)
-				}
-				if numSent != len(stateBytes) {
-					log.Println("serial wrote wrong byte count")
 				}
 			}
 		}
