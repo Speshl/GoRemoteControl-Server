@@ -69,8 +69,8 @@ func (s GroundState) GetBytes() []byte {
 		returnBytes[1] = byte(servoMid)
 	}
 
-	panValue := mapToRange(s.Pan, baseMin, baseMax, 0, 127)
-	tiltValue := mapToRange(s.Tilt, baseMin, baseMax, 0, 127)
+	panValue := mapToRange(s.Pan, baseMin, baseMax, 0, 15)
+	tiltValue := mapToRange(s.Tilt, baseMin, baseMax, 0, 15)
 	panAndTilt := (panValue << 4) | tiltValue
 	if panAndTilt > 255 {
 		returnBytes[2] = 255

@@ -106,3 +106,22 @@ func GetJoysticks() ([]joystick.Joystick, error) {
 	}
 	return joySticks, nil
 }
+
+func ShowJoyStats() ([]joystick.Joystick, error) {
+	joySticks, err := GetJoysticks()
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		for i, joystick := range joySticks {
+			state, err := joystick.Read()
+			if err != nil {
+				return nil, err
+			}
+			log.Printf("Joystick %d state: %+v\n", i, state)
+
+		}
+		time.Sleep(1000)
+	}
+}

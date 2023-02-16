@@ -13,6 +13,7 @@ import (
 func main() {
 
 	listJoysticks := flag.Bool("joys", false, "List available joysticks")
+	showJoyStats := flag.Bool("joystats", false, "Shows states of connected joysticks")
 	listSerial := flag.Bool("serial", false, "List available serial devices")
 	isServer := flag.Bool("server", true, "Run as UDP Server")
 	isClient := flag.Bool("client", true, "Run as UDP Client and Controller Reader")
@@ -23,6 +24,11 @@ func main() {
 
 	if listJoysticks != nil && *listJoysticks {
 		_, err := client.GetJoysticks()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else if showJoyStats != nil && *showJoyStats {
+		_, err := client.ShowJoyStats()
 		if err != nil {
 			log.Fatal(err)
 		}

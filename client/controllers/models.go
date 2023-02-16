@@ -27,12 +27,21 @@ type Config struct {
 
 type Mapper func([]joystick.State) (models.StateIface, error)
 
+type AxisEntry struct {
+	DeviceID int  `json:"deviceID"`
+	AxisID   int  `json:"axisID"`
+	Inverted bool `json:"inverted"`
+}
+
+type ButtonEntry struct {
+	DeviceID int  `json:"deviceID"`
+	MaxID    int  `json:"maxID"`
+	MinID    *int `json:"minID"`
+}
+
 type ConfigEntry struct {
-	DeviceID   int              `json:"deviceID"`
-	DeviceName string           `json:"deviceName"`
-	InputType  models.InputType `json:"inputType"`
-	InputID    int              `json:"inputID"`
-	Inverted   bool             `json:"inverted"`
+	Axis   *AxisEntry   `json:"axis"`
+	Button *ButtonEntry `json:"button"`
 }
 
 type GroundConfig struct {
@@ -44,8 +53,8 @@ type GroundConfig struct {
 	Pan       ConfigEntry `json:"pan"`
 	Tilt      ConfigEntry `json:"tilt"`
 	NumGears  int
-	Gears     []ConfigEntry `json:"gears"`
-	Aux       []ConfigEntry `json:"aux"`
+	Gears     []ButtonEntry `json:"gears"`
+	Aux       []ButtonEntry `json:"aux"`
 }
 
 type FixedConfig struct {

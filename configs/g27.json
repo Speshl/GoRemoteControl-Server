@@ -2,107 +2,113 @@
     "schema": "ground",
     "mapping":{
         "steer": {
-            "deviceID": 0,
-            "inputType": 1,
-            "inputID": 0
-
+            "axis":{
+                "deviceID": 0,
+                "axisID": 0
+            },
+            "button":{
+                "deviceID": 0,
+                "minID": 0,
+                "maxID": 0
+            }
         },
         "gas": {
-            "deviceID": 0,
-            "inputType": 1,
-            "inputID": 2,
-            "inverted": true
-
+            "axis":{
+                "deviceID": 0,
+                "axisID": 2,
+                "inverted": true
+            }
         },
         "brake": {
-            "deviceID": 0,
-            "inputType": 1,
-            "inputID": 3,
-            "inverted": true
-
+            "axis":{
+                "deviceID": 0,
+                "axisID": 3,
+                "inverted": true
+            }
         },
         "clutch": {
-            "deviceID": 0,
-            "inputType": 1,
-            "inputID": 4,
-            "inverted": true
-
+            "axis":{
+                "deviceID": 0,
+                "axisID": 4,
+                "inverted": true
+            }
         },
         "handbrake": {
-            "deviceID": 0,
-            "inputType": 1,
-            "inputID": 5
-
+            "axis":{
+                "deviceID": 0,
+                "axisID": 2,
+                "inverted": true
+            }
         },
         "pan": {
-            "deviceID": 0,
-            "inputType": 1,
-            "inputID": 5
-
+            "axis":{
+                "deviceID": 0,
+                "axisID": 5
+            },
+            "button":{
+                "deviceID": 0,
+                "minID": 1,
+                "maxID": 2
+            }
         },
         "tilt":{
-            "deviceID": 0,
-            "inputType": 1,
-            "inputID": 5
-
+            "axis":{
+                "deviceID": 0,
+                "axisID": 6,
+                "inverted": true
+            },
+            "button":{
+                "deviceID": 0,
+                "minID": 1,
+                "maxID": 2
+            }
         },
         "gears":[
             {
                 "deviceID": 0,
-                "inputType": 2,
-                "inputID": 8
+                "maxID": 8
             },
             {
                 "deviceID": 0,
-                "inputType": 2,
-                "inputID": 9
+                "maxID": 9
             },
             {
                 "deviceID": 0,
-                "inputType": 2,
-                "inputID": 10
+                "maxID": 10
             },
             {
                 "deviceID": 0,
-                "inputType": 2,
-                "inputID": 11
+                "maxID": 11
             },
             {
                 "deviceID": 0,
-                "inputType": 2,
-                "inputID": 12
+                "maxID": 12
             },
             {
                 "deviceID": 0,
-                "inputType": 2,
-                "inputID": 13
+                "maxID": 13
             },
             {
                 "deviceID": 0,
-                "inputType": 2,
-                "inputID": 14
+                "maxID": 14
             }
         ],
         "aux":[
             {
                 "deviceID": 0,
-                "inputType": 2,
+                "inputID": 0
+            },
+            {
+                "deviceID": 0,
                 "inputID": 1
             },
             {
                 "deviceID": 0,
-                "inputType": 2,
                 "inputID": 2
             },
             {
                 "deviceID": 0,
-                "inputType": 2,
                 "inputID": 3
-            },
-            {
-                "deviceID": 0,
-                "inputType": 2,
-                "inputID": 4
             }
         ]
     }

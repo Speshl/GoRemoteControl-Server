@@ -102,7 +102,7 @@ func (c *Controller) SetSchema(schema models.ControlSchema) {
 func (c *Controller) GetState(schema models.ControlSchema) (models.StateIface, error) {
 	switch schema {
 	case models.ControlSchemaGround:
-		return c.mapGroundState()
+		return c.mapGroundState(), nil
 	default:
 		return nil, fmt.Errorf("unsupported control schema")
 	}

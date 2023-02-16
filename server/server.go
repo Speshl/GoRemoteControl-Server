@@ -126,6 +126,45 @@ func (s *Server) startSerial(ctx context.Context, errGroup *errgroup.Group, late
 	return nil
 }
 
+func (s *Server) startSerialWriter_TEST(ctx context.Context, errGroup *errgroup.Group, serialPort *serial.Port, latestState *LatestState) error {
+	ticker := time.NewTicker(30 * time.Millisecond) //RF Update rate
+	errGroup.Go(func() error {
+		defer log.Println("Serial Writer Closing")
+		steerValue := 0
+		escValue := 0
+		for {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-ticker.C:
+				/*state, err := latestState.Get()
+				if err != nil {
+					log.Println("skipping rf send - latest state already used")
+					continue
+				}
+
+				if state == nil {
+					log.Println("got nil state")
+					continue
+				}*/
+				steerValue++
+				if steerValue > 180 {
+					escValue++
+					steerValue = 0
+				}
+
+				triggerKey := []byte{255, 127} //prepended to data to keep in sync
+				stateBytes := append(triggerKey, byte(steerValue), byte(escValue), 0, 0 /*state.GetBytes()...*/)
+				_, err := (*serialPort).Write(stateBytes)
+				if err != nil {
+					return fmt.Errorf("serial write error: %w", err)
+				}
+			}
+		}
+	})
+	return nil
+}
+
 func (s *Server) startSerialWriter(ctx context.Context, errGroup *errgroup.Group, serialPort *serial.Port, latestState *LatestState) error {
 	ticker := time.NewTicker(30 * time.Millisecond) //RF Update rate
 	errGroup.Go(func() error {
