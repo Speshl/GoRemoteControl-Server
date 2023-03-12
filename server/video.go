@@ -84,12 +84,13 @@ func (s *Server) streamVideo(w http.ResponseWriter, req *http.Request) {
 	partHeader.Add("Content-Type", "image/jpeg")
 
 	ctx := req.Context()
-	ticker := time.NewTicker(30 * time.Millisecond) //Video Update Rate
+	ticker := time.NewTicker(10 * time.Millisecond) //Video Update Rate
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
+			log.Printf("sending frame")
 			frame, err := s.latestFrame.Get()
 			if err != nil {
 				continue // frame already sent
