@@ -12,8 +12,8 @@ import (
 
 func main() {
 
-	isServer := flag.Bool("server", true, "Run as UDP Server")
-	isClient := flag.Bool("client", true, "Run as UDP Client and Controller Reader")
+	isServer := flag.Bool("server", false, "Run as UDP Server")
+	isClient := flag.Bool("client", false, "Run as UDP Client and Controller Reader")
 
 	listJoysticks := flag.Bool("listjoys", false, "List available joysticks")
 	showJoyStats := flag.Bool("joystats", false, "Shows states of connected joysticks")
