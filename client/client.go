@@ -28,7 +28,8 @@ func NewClient(address string, cfgPath string) *Client {
 }
 
 func (c *Client) RunClient(ctx context.Context) error {
-	defer log.Println("Client Closing")
+	log.Println("starting client...")
+	defer log.Println("client stopped")
 
 	udpServer, err := net.ResolveUDPAddr("udp", c.address)
 	if err != nil {
@@ -55,7 +56,8 @@ func (c *Client) RunClient(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Println("Start Sending...")
+	log.Println("start sending...")
+	defer log.Println("sending stopped")
 	ticker := time.NewTicker(4 * time.Millisecond)
 	for {
 		select {

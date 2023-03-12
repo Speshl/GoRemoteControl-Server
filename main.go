@@ -30,6 +30,8 @@ func main() {
 	serialPort := flag.String("serial", "COM3", "Serial Port")
 	baudRate := flag.Int("baudrate", 115200, "Serial baudrate")
 
+	flag.Parse()
+
 	if listJoysticks != nil && *listJoysticks {
 		_, err := client.GetJoysticks()
 		if err != nil {
@@ -47,14 +49,17 @@ func main() {
 		}
 	} else {
 		errorGroup, ctx := errgroup.WithContext(context.Background())
+
 		if isClient != nil && *isClient {
 			c := client.NewClient(":"+*udpPort, *controlDeviceCfg)
 			errorGroup.Go(func() error { return c.RunClient(ctx) })
 		}
+
 		if isServer != nil && *isServer {
 			s := server.NewServer(":"+*udpPort, serialPort, baudRate, useVideo, videoDevice, videoPort)
 			errorGroup.Go(func() error { return s.RunServer(ctx) })
 		}
+
 		err := errorGroup.Wait()
 		if err != nil {
 			log.Fatalf("Errorgroup had error: %s", err.Error())
