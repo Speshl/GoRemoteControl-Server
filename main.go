@@ -12,14 +12,22 @@ import (
 
 func main() {
 
-	listJoysticks := flag.Bool("joys", false, "List available joysticks")
-	showJoyStats := flag.Bool("joystats", false, "Shows states of connected joysticks")
-	listSerial := flag.Bool("serial", false, "List available serial devices")
 	isServer := flag.Bool("server", true, "Run as UDP Server")
 	isClient := flag.Bool("client", true, "Run as UDP Client and Controller Reader")
-	udpPort := flag.String("port", "1053", "UDP Port")
-	serialPort := flag.String("device", "COM3", "Serial device")
-	deviceCfg := flag.String("cfg", "./configs/g27.json", "Path to cfg json")
+
+	listJoysticks := flag.Bool("listjoys", false, "List available joysticks")
+	showJoyStats := flag.Bool("joystats", false, "Shows states of connected joysticks")
+
+	udpPort := flag.String("joystickport", "1053", "Joystick Port")
+
+	videoDevice := flag.String("videodevice", "/dev/video0", "Video Device (eg. /dev/video0)")
+	videoPort := flag.String("videoport", "1054", "Video Port")
+	useVideo := flag.Bool("video", true, "Start video capture: true or false")
+
+	controlDeviceCfg := flag.String("cfg", "./configs/g27.json", "Path to cfg json")
+
+	listSerial := flag.Bool("listserial", false, "List available serial devices")
+	serialPort := flag.String("serial", "COM3", "Serial Port")
 	baudRate := flag.Int("baudrate", 115200, "Serial baudrate")
 
 	if listJoysticks != nil && *listJoysticks {
@@ -40,11 +48,11 @@ func main() {
 	} else {
 		errorGroup, ctx := errgroup.WithContext(context.Background())
 		if isClient != nil && *isClient {
-			c := client.NewClient(":"+*udpPort, *deviceCfg)
+			c := client.NewClient(":"+*udpPort, *controlDeviceCfg)
 			errorGroup.Go(func() error { return c.RunClient(ctx) })
 		}
 		if isServer != nil && *isServer {
-			s := server.NewServer(":"+*udpPort, serialPort, baudRate)
+			s := server.NewServer(":"+*udpPort, serialPort, baudRate, useVideo, videoDevice, videoPort)
 			errorGroup.Go(func() error { return s.RunServer(ctx) })
 		}
 		err := errorGroup.Wait()
