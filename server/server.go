@@ -38,18 +38,19 @@ func NewServer(address string, serialPort *string, baudRate *int, useVideo *bool
 }
 
 func (s *Server) RunServer(ctx context.Context) error {
-	log.Println("starint controller server...")
+	log.Println("starting controller server...")
 	defer log.Println("controller server stopped")
 
 	errGroup, ctx := errgroup.WithContext(ctx)
 
-	errGroup.Go(func() error {
+	//TODO: Uncomment after working on video
+	/*errGroup.Go(func() error {
 		return s.startUDPListener(ctx)
 	})
 
 	errGroup.Go(func() error {
 		return s.startSerial(ctx)
-	})
+	})*/
 
 	errGroup.Go(func() error {
 		return s.startVideoCapture(ctx)

@@ -56,6 +56,7 @@ func (s *Server) startVideoServer(ctx context.Context) error {
 	}
 	http.HandleFunc("/stream", s.streamVideo)
 	log.Fatal(http.ListenAndServe(*s.videoPort, nil))
+	return nil
 }
 
 func (s *Server) streamVideo(w http.ResponseWriter, req *http.Request) {
