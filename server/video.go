@@ -119,9 +119,10 @@ func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
 
 	// Start HTTP response
 	w.Header().Add("Content-Type", "text/html")
-	t, err := template.ParseFiles("viewer.html")
+	t, err := template.ParseFiles("./server/viewer.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("error serving page: %s", err.Error())
 		return
 	}
 
