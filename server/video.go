@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -34,8 +35,22 @@ func (s *Server) startVideoCapture(ctx context.Context) error {
 		return fmt.Errorf("camera start: %w", err)
 	}
 
-	frames := camera.GetOutput()
+	caps := camera.Capability()
+	log.Printf("device info: %s", caps.String())
+	currFmt, err := camera.GetPixFormat()
+	if err != nil {
+		log.Fatalf("unable to get format: %s", err)
+	}
+	log.Printf("current camera format: %s", currFmt)
 
+	s.streamInfo = fmt.Sprintf("%s - %s [%dx%d] %d fps",
+		caps.Card,
+		v4l2.PixelFormats[currFmt.PixelFormat],
+		currFmt.Width, currFmt.Height, s.fps,
+	)
+
+	frames := camera.GetOutput()
+	log.Printf("camera started")
 	for {
 		select {
 		case <-ctx.Done():
@@ -55,12 +70,14 @@ func (s *Server) startVideoServer(ctx context.Context) error {
 		return nil
 	}
 	log.Println("starting video server...")
+	http.HandleFunc("/webcam", s.servePage) // returns an html page
 	http.HandleFunc("/stream", s.streamVideo)
 	log.Fatal(http.ListenAndServe(":"+*s.videoPort, nil))
 	return nil
 }
 
 func (s *Server) streamVideo(w http.ResponseWriter, req *http.Request) {
+	log.Println("got stream request")
 	mimeWriter := multipart.NewWriter(w)
 	w.Header().Set("Content-Type", fmt.Sprintf("multipart/x-mixed-replace; boundary=%s", mimeWriter.Boundary()))
 	partHeader := make(textproto.MIMEHeader)
@@ -88,5 +105,30 @@ func (s *Server) streamVideo(w http.ResponseWriter, req *http.Request) {
 				log.Printf("failed to write image: %s", err)
 			}
 		}
+	}
+}
+
+func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
+	pd := PageData{
+		StreamInfo:  s.streamInfo,
+		StreamPath:  fmt.Sprintf("/stream?%d", time.Now().UnixNano()),
+		ImgWidth:    s.width,
+		ImgHeight:   s.height,
+		ControlPath: "/control",
+	}
+
+	// Start HTTP response
+	w.Header().Add("Content-Type", "text/html")
+	t, err := template.ParseFiles("viewer.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// execute and return the template
+	w.WriteHeader(http.StatusOK)
+	err = t.Execute(w, pd)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

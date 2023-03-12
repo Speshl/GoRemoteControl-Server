@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/Speshl/GoRemoteControl/models"
+	"github.com/Speshl/GoRemoteControl/vendor/github.com/vladimirvivien/go4vl/v4l2"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -24,6 +25,20 @@ type Server struct {
 	videoPort   *string
 	latestFrame LatestFrame
 	latestState LatestState
+
+	fps        uint32
+	pixfmt     v4l2.FourCCType
+	width      int
+	height     int
+	streamInfo string
+}
+
+type PageData struct {
+	StreamInfo  string
+	StreamPath  string
+	ImgWidth    int
+	ImgHeight   int
+	ControlPath string
 }
 
 func NewServer(address string, serialPort *string, baudRate *int, useVideo *bool, videoDevice *string, videoPort *string) *Server {
@@ -34,6 +49,10 @@ func NewServer(address string, serialPort *string, baudRate *int, useVideo *bool
 		useVideo:    useVideo,
 		videoDevice: videoDevice,
 		videoPort:   videoPort,
+
+		fps:    30,
+		width:  640,
+		height: 480,
 	}
 }
 
@@ -68,7 +87,8 @@ func (s *Server) RunServer(ctx context.Context) error {
 }
 
 func (s *Server) startUDPListener(ctx context.Context) error {
-	log.Println("starting UDP listener...")
+	log.Printf("starting UDP listener on port %s...", s.address)
+	defer log.Println("stopping UDP listener")
 	udpServer, err := net.ListenPacket("udp", s.address)
 	if err != nil {
 		return err
