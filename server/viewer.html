@@ -11,12 +11,20 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"/>
 </head>
 <body>
-    
-    <div class="card-image">
-        <img id="img" src="{{.StreamPath}}" class="streamimg"/>
-        <span class="card-title">GoRemoteControl ({{.StreamInfo}})</span>
+
+    <div class="row" style="padding: 0px; border:0px; margin: 0px;">
+        <div class="col s12 m8 l9">
+            <div class="container center-align">
+                <div class="card">
+                    <div class="card-image">
+                        <img id="img" src="{{.StreamPath}}" class="streamimg"/>
+                        <span class="card-title">GoRemoteControl ({{.StreamInfo}})</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-           
+
 <!--  Scripts-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>

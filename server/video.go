@@ -84,7 +84,7 @@ func (s *Server) streamVideo(w http.ResponseWriter, req *http.Request) {
 	partHeader.Add("Content-Type", "image/jpeg")
 
 	ctx := req.Context()
-	ticker := time.NewTicker(10 * time.Millisecond) //Video Update Rate
+	ticker := time.NewTicker(1 * time.Millisecond) //Video Update Rate
 	for {
 		select {
 		case <-ctx.Done():
