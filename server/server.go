@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Speshl/GoRemoteControl/models"
+	"github.com/Speshl/GoRemoteControl_Server/models"
 	"github.com/vladimirvivien/go4vl/v4l2"
 	"golang.org/x/sync/errgroup"
 )

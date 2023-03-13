@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/Speshl/GoRemoteControl/server"
+	"github.com/Speshl/GoRemoteControl_Server/server"
 	"golang.org/x/sync/errgroup"
 )
 
