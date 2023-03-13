@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/Speshl/GoRemoteControl_Server/models"
-	"github.com/vladimirvivien/go4vl/v4l2"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -26,8 +25,8 @@ type Server struct {
 	latestFrame LatestFrame
 	latestState LatestState
 
-	fps        uint32
-	pixfmt     v4l2.FourCCType
+	fps uint32
+	//pixfmt     v4l2.FourCCType
 	width      int
 	height     int
 	streamInfo string

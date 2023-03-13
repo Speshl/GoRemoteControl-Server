@@ -10,7 +10,7 @@ import (
 	"net/textproto"
 	"time"
 
-	videoDevice "github.com/vladimirvivien/go4vl/device"
+	"github.com/vladimirvivien/go4vl/device"
 	"github.com/vladimirvivien/go4vl/v4l2"
 )
 
@@ -23,8 +23,8 @@ func (s *Server) startVideoCapture(ctx context.Context) error {
 	log.Printf("starting camera %s...", *s.videoDevice)
 	defer log.Printf("stopping camera")
 
-	camera, err := videoDevice.Open(*s.videoDevice,
-		videoDevice.WithPixFormat(v4l2.PixFormat{PixelFormat: v4l2.PixelFmtMJPEG, Width: 640, Height: 480}),
+	camera, err := device.Open(*s.videoDevice,
+		device.WithPixFormat(v4l2.PixFormat{PixelFormat: v4l2.PixelFmtMJPEG, Width: 640, Height: 480}),
 	)
 	if err != nil {
 		return err

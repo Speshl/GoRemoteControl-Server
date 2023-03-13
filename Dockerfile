@@ -1,27 +1,27 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.19-bullseye
-WORKDIR /app
+FROM --platform=$BUILDPLATFORM crazymax/goxx:latest AS base
 
-COPY go.mod ./
-COPY go.sum ./
-RUN go mod download
+ENV OUTPUT="simple-cam"
+ENV CGO_ENABLED=1
+WORKDIR /src
 
-COPY / ./
-RUN ls -la ./*.go
+FROM base AS build
+ARG TARGETPLATFORM
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+  --mount=type=cache,sharing=private,target=/var/lib/apt/lists \
+  goxx-apt-get install -y binutils gcc g++ pkg-config
+RUN --mount=type=bind,source=. \
+  --mount=type=cache,target=/root/.cache \
+  --mount=type=cache,target=/go/pkg/mod \
+  goxx-go build -o /out/${OUTPUT} .
 
-RUN apt-get update -qq  
-#RUN apt-get install -y build-essential
-RUN apt-get install -y v4l-utils
+FROM scratch AS artifact
+COPY --from=build /out /
 
-#RUN go get github.com/vladimirvivien/go4vl/v4l2
 
-RUN go build -o /GoRemoteControl-Server
-
-EXPOSE 1054/tcp
-EXPOSE 1053/udp
-
-CMD [ "/GoRemoteControl-Server"]
+## Build with the following command
+# docker build --platform "linux/arm/v6" --output "./build" .
 
 
 #****************** To Build and Deploy to DockerHub**************************

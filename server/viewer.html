@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+<style>
+        .streamimg {
+          width: 200%;
+          height: 200%;
+        }
+        </style>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
@@ -53,7 +59,7 @@
             <div class="container center-align">
                 <div class="card">
                     <div class="card-image">
-                        <img id="img" src="{{.StreamPath}}"/>
+                        <img id="img" src="{{.StreamPath}}" class="streamimg"/>
                         <span class="card-title">GoCam ({{.StreamInfo}})</span>
                     </div>
                 </div>
