@@ -90,7 +90,6 @@ func (s *Server) streamVideo(w http.ResponseWriter, req *http.Request) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			log.Printf("sending frame")
 			frame, err := s.latestFrame.Get()
 			if err != nil {
 				continue // frame already sent
