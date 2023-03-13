@@ -65,7 +65,6 @@ func (s *Server) startSerialWriter(ctx context.Context, serialPort *serial.Port)
 			}
 		}
 	}
-	return nil
 }
 
 func (s *Server) startSerialReader(ctx context.Context, serialPort *serial.Port) error {
