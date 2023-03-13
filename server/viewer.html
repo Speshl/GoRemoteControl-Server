@@ -17,12 +17,6 @@
 </head>
 <body>
 
-    
-    <div class="row red accent-2" style="padding: 0px; border:0px; margin: 0px;">
-        <div class="col s12 m12 l12">
-            <h1 class="center-align white-text">📸 GoCam</h1>
-        </div>
-    </div>
     <div class="row" style="padding: 0px; border:0px; margin: 0px;">
         <div class="col s12 m8 l9">
             <div class="container center-align">
@@ -38,16 +32,5 @@
 
 <!--  Scripts-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
-<script>
-    let faceDetect = "off"
-    function setCtrl(ctrl, val) {
-        let xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "{{.ControlPath}}", true);
-        xhttp.setRequestHeader("Content-Type", "application/json");
-        var data = JSON.stringify({ "name": ctrl, "value": val });
-        xhttp.send(data)
-    }
-</script>
 </body>
 </html>
