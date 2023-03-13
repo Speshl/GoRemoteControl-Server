@@ -56,72 +56,18 @@ func ParseControlSchema(name string) (ControlSchema, error) {
 	return ControlSchema(0), fmt.Errorf("%s is %w", name, ErrInvalidControlSchema)
 }
 
-const (
-	// DeviceTypeG27 is a DeviceType of type G27.
-	DeviceTypeG27 DeviceType = iota
-)
-
-var ErrInvalidDeviceType = errors.New("not a valid DeviceType")
-
-const _DeviceTypeName = "g27"
-
-var _DeviceTypeMap = map[DeviceType]string{
-	DeviceTypeG27: _DeviceTypeName[0:3],
+// MarshalText implements the text marshaller method.
+func (x ControlSchema) MarshalText() ([]byte, error) {
+	return []byte(x.String()), nil
 }
 
-// String implements the Stringer interface.
-func (x DeviceType) String() string {
-	if str, ok := _DeviceTypeMap[x]; ok {
-		return str
+// UnmarshalText implements the text unmarshaller method.
+func (x *ControlSchema) UnmarshalText(text []byte) error {
+	name := string(text)
+	tmp, err := ParseControlSchema(name)
+	if err != nil {
+		return err
 	}
-	return fmt.Sprintf("DeviceType(%d)", x)
-}
-
-var _DeviceTypeValue = map[string]DeviceType{
-	_DeviceTypeName[0:3]: DeviceTypeG27,
-}
-
-// ParseDeviceType attempts to convert a string to a DeviceType.
-func ParseDeviceType(name string) (DeviceType, error) {
-	if x, ok := _DeviceTypeValue[name]; ok {
-		return x, nil
-	}
-	return DeviceType(0), fmt.Errorf("%s is %w", name, ErrInvalidDeviceType)
-}
-
-const (
-	// InputTypeButton is a InputType of type Button.
-	InputTypeButton InputType = iota
-	// InputTypeAxis is a InputType of type Axis.
-	InputTypeAxis
-)
-
-var ErrInvalidInputType = errors.New("not a valid InputType")
-
-const _InputTypeName = "buttonaxis"
-
-var _InputTypeMap = map[InputType]string{
-	InputTypeButton: _InputTypeName[0:6],
-	InputTypeAxis:   _InputTypeName[6:10],
-}
-
-// String implements the Stringer interface.
-func (x InputType) String() string {
-	if str, ok := _InputTypeMap[x]; ok {
-		return str
-	}
-	return fmt.Sprintf("InputType(%d)", x)
-}
-
-var _InputTypeValue = map[string]InputType{
-	_InputTypeName[0:6]:  InputTypeButton,
-	_InputTypeName[6:10]: InputTypeAxis,
-}
-
-// ParseInputType attempts to convert a string to a InputType.
-func ParseInputType(name string) (InputType, error) {
-	if x, ok := _InputTypeValue[name]; ok {
-		return x, nil
-	}
-	return InputType(0), fmt.Errorf("%s is %w", name, ErrInvalidInputType)
+	*x = tmp
+	return nil
 }
