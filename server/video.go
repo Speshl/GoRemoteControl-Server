@@ -4,13 +4,10 @@ import (
 	"context"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
-	"os"
-	"path"
 	"time"
 
 	"github.com/vladimirvivien/go4vl/device"
@@ -122,21 +119,6 @@ func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
 
 	// Start HTTP response
 	w.Header().Add("Content-Type", "text/html")
-
-	cwd, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-
-	path, err := os.Executable()
-	if err != nil {
-		log.Println(err)
-	}
-
-	log.Printf("CWD: %s \n PATH: %s\n", cwd, path)
-
-	recursivePrintFiles(cwd)
-
 	t, err := template.ParseFiles("viewer.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -149,19 +131,5 @@ func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
 	err = t.Execute(w, pd)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-func recursivePrintFiles(dir string) {
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Num Files in Directory: %d\n", len(files))
-	for _, file := range files {
-		fmt.Println(file.Name(), file.IsDir())
-		if file.IsDir() {
-			recursivePrintFiles(path.Join(dir, file.Name()))
-		}
 	}
 }
