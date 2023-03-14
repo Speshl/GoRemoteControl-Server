@@ -143,7 +143,7 @@ func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(file.Name(), file.IsDir())
 	}
 
-	t, err := template.ParseFiles("/server/viewer.html")
+	t, err := template.ParseFiles("./viewer.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Printf("error serving page: %s", err.Error())
