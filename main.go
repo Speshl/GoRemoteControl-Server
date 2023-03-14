@@ -17,7 +17,7 @@ func main() {
 	useVideo := flag.Bool("video", true, "Start video capture: true or false")
 
 	listSerial := flag.Bool("listserial", false, "List available serial devices")
-	serialPort := flag.String("serial", "COM3", "Serial Port")
+	serialPort := flag.String("serial", "/dev/usbTTY0", "Serial Port") //windows: COM3
 	baudRate := flag.Int("baudrate", 115200, "Serial baudrate")
 
 	flag.Parse()

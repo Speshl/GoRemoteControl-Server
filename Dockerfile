@@ -2,7 +2,7 @@
 
 FROM --platform=$BUILDPLATFORM crazymax/goxx:latest AS base
 FROM golang:1.19-bullseye
-WORKDIR /app
+WORKDIR /server
 
 COPY /GoRemoteControl_Server /GoRemoteControl_Server
 COPY /viewer.html /viewer.html
