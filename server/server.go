@@ -74,9 +74,7 @@ func (s *Server) RunServer(ctx context.Context) error {
 		return s.startVideoCapture(ctx)
 	})
 
-	errGroup.Go(func() error {
-		return s.startVideoServer(ctx)
-	})
+	go s.startVideoServer(ctx)
 
 	err := errGroup.Wait()
 	if err != nil {

@@ -1,23 +1,40 @@
 # syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM crazymax/goxx:latest AS base
+FROM golang:1.19-bullseye
+WORKDIR /app
 
-ENV OUTPUT="simple-cam"
-ENV CGO_ENABLED=1
-WORKDIR /src
+COPY /GoRemoteControl_Server /GoRemoteControl_Server
+COPY /viewer.html /viewer.html
 
-FROM base AS build
-ARG TARGETPLATFORM
-RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
-  --mount=type=cache,sharing=private,target=/var/lib/apt/lists \
-  goxx-apt-get install -y binutils gcc g++ pkg-config
-RUN --mount=type=bind,source=. \
-  --mount=type=cache,target=/root/.cache \
-  --mount=type=cache,target=/go/pkg/mod \
-  goxx-go build -o /out/${OUTPUT} .
+EXPOSE 1054/tcp
+EXPOSE 1053/udp
 
-FROM scratch AS artifact
-COPY --from=build /out /
+CMD [ "/GoRemoteControl_Server"]
+
+
+#scp dockerbox@192.168.1.41:~/go/src/github.com/Speshl/GoRemoteControl/GoRemoteControl_Server .
+
+#scp dockerbox@192.168.1.41:~/scripts/pi_compose.yml .
+#scp pi_compose.yml dockerbox@192.168.1.41:~/scripts/pi_compose.yml
+
+
+# ENV OUTPUT="simple-cam"
+# ENV CGO_ENABLED=1
+# WORKDIR /src
+
+# FROM base AS build
+# ARG TARGETPLATFORM
+# RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+#   --mount=type=cache,sharing=private,target=/var/lib/apt/lists \
+#   goxx-apt-get install -y binutils gcc g++ pkg-config
+# RUN --mount=type=bind,source=. \
+#   --mount=type=cache,target=/root/.cache \
+#   --mount=type=cache,target=/go/pkg/mod \
+#   goxx-go build -o /out/${OUTPUT} .
+
+# FROM scratch AS artifact
+# COPY --from=build /out /
 
 
 ## Build with the following command
@@ -35,7 +52,7 @@ COPY --from=build /out /
 #****************** Build and Test Local**************************
 #docker build --platform=linux/amd64 -t speshl/goremotecontrol-server:latest .
 
-#docker run  -d -p 1054:1054 -p 1053:1053 speshl/goremotecontrol-server:latest
+#docker run -d -p 1054:1054 -p 1053:1053 speshl/goremotecontrol-server:latest
 
 
 
