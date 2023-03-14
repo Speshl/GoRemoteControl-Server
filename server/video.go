@@ -137,7 +137,7 @@ func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
 
 	recursivePrintFiles(cwd)
 
-	t, err := template.ParseFiles("./viewer.html")
+	t, err := template.ParseFiles("viewer.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Printf("error serving page: %s", err.Error())
@@ -157,6 +157,7 @@ func recursivePrintFiles(dir string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("Num Files in Directory: %d\n", len(files))
 	for _, file := range files {
 		fmt.Println(file.Name(), file.IsDir())
 		if file.IsDir() {
