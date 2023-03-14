@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/textproto"
 	"os"
+	"path"
 	"time"
 
 	"github.com/vladimirvivien/go4vl/device"
@@ -134,14 +135,7 @@ func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("CWD: %s \n PATH: %s\n", cwd, path)
 
-	files, err := ioutil.ReadDir(cwd)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, file := range files {
-		fmt.Println(file.Name(), file.IsDir())
-	}
+	recursivePrintFiles(cwd)
 
 	t, err := template.ParseFiles("./viewer.html")
 	if err != nil {
@@ -155,5 +149,18 @@ func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
 	err = t.Execute(w, pd)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func recursivePrintFiles(dir string) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, file := range files {
+		fmt.Println(file.Name(), file.IsDir())
+		if file.IsDir() {
+			recursivePrintFiles(path.Join(dir, file.Name()))
+		}
 	}
 }
