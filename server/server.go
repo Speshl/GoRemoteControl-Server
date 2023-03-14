@@ -61,14 +61,13 @@ func (s *Server) RunServer(ctx context.Context) error {
 
 	errGroup, ctx := errgroup.WithContext(ctx)
 
-	//TODO: Uncomment after working on video
-	/*errGroup.Go(func() error {
+	errGroup.Go(func() error {
 		return s.startUDPListener(ctx)
 	})
 
 	errGroup.Go(func() error {
 		return s.startSerial(ctx)
-	})*/
+	})
 
 	errGroup.Go(func() error {
 		return s.startVideoCapture(ctx)
