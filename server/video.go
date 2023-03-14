@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
+	"os"
 	"time"
 
 	"github.com/vladimirvivien/go4vl/device"
@@ -119,7 +121,29 @@ func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
 
 	// Start HTTP response
 	w.Header().Add("Content-Type", "text/html")
-	t, err := template.ParseFiles("./server/viewer.html")
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+
+	path, err := os.Executable()
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Printf("CWD: %s \n PATH: %s\n", cwd, path)
+
+	files, err := ioutil.ReadDir(cwd)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		fmt.Println(file.Name(), file.IsDir())
+	}
+
+	t, err := template.ParseFiles("/server/viewer.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Printf("error serving page: %s", err.Error())
