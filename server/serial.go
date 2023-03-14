@@ -48,7 +48,7 @@ func (s *Server) startSerialWriter(ctx context.Context, serialPort *serial.Port)
 		case <-ticker.C:
 			state, err := s.latestState.Get()
 			if err != nil {
-				log.Println("skipping RF send - latest state already used")
+				//log.Println("skipping RF send - latest state already used")
 				continue
 			}
 
