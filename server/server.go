@@ -16,14 +16,18 @@ import (
 )
 
 type Server struct {
-	address     string
-	serialPort  *string
-	baudRate    *int
-	videoDevice *string
-	useVideo    *bool
-	videoPort   *string
-	latestFrame LatestFrame
-	latestState LatestState
+	address           string
+	serialPort        *string
+	baudRate          *int
+	videoDevice       *string
+	useVideo          *bool
+	videoPort         *string
+	latestFrame       LatestFrame
+	latestState       LatestState
+	stopChannel       chan struct{} //stop video capture
+	startChannel      chan struct{} //start video capture
+	connectChannel    chan struct{} //stream request started
+	disconnectChannel chan struct{} //stream request stopped
 
 	fps uint32
 	//pixfmt     v4l2.FourCCType
@@ -41,6 +45,12 @@ type PageData struct {
 }
 
 func NewServer(address string, serialPort *string, baudRate *int, useVideo *bool, videoDevice *string, videoPort *string) *Server {
+
+	stopChannel := make(chan struct{}, 2)
+	startChannel := make(chan struct{}, 2)
+	connectChannel := make(chan struct{}, 2)
+	disconnectChannel := make(chan struct{}, 2)
+
 	return &Server{
 		address:     address,
 		serialPort:  serialPort,
@@ -48,6 +58,11 @@ func NewServer(address string, serialPort *string, baudRate *int, useVideo *bool
 		useVideo:    useVideo,
 		videoDevice: videoDevice,
 		videoPort:   videoPort,
+
+		stopChannel:       stopChannel,
+		startChannel:      startChannel,
+		connectChannel:    connectChannel,
+		disconnectChannel: disconnectChannel,
 
 		fps:    30,
 		width:  640,
@@ -71,6 +86,11 @@ func (s *Server) RunServer(ctx context.Context) error {
 
 	errGroup.Go(func() error {
 		return s.startVideoCapture(ctx)
+	})
+
+	errGroup.Go(func() error {
+		s.startClientCounter(ctx)
+		return nil
 	})
 
 	go s.startVideoServer(ctx)
