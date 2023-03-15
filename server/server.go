@@ -128,7 +128,7 @@ func (s *Server) startUDPListener(ctx context.Context) error {
 					log.Printf("server decode error: %s\n", err.Error())
 					continue
 				}
-				log.Printf("%d bytes (Type: %s) read from %s with delay %s\n", numRead, packet.StateType, addr.String(), time.Since(packet.SentAt).String())
+				log.Printf("%d bytes (Type: %s) read from %s with delay %s (Sent: %d) (Now: %d)\n", numRead, packet.StateType, addr.String(), time.Since(packet.SentAt).String())
 				s.latestState.Set(packet.State)
 			}
 		}
