@@ -13,7 +13,7 @@ EXPOSE 1053/udp
 CMD [ "/GoRemoteControl_Server"]
 
 
-#scp dockerbox@192.168.1.41:~/go/src/github.com/Speshl/GoRemoteControl/GoRemoteControl_Server .
+#scp dockerbox@192.168.1.41:~/go/src/github.com/Speshl/GoRemoteControl_Server/GoRemoteControl_Server .
 
 #scp dockerbox@192.168.1.41:~/scripts/pi_compose.yml .
 #scp pi_compose.yml dockerbox@192.168.1.41:~/scripts/pi_compose.yml

@@ -105,10 +105,14 @@ func (s *Server) startUDPListener(ctx context.Context) error {
 	}()
 
 	log.Printf("listening on address %s...\n", s.address)
+	ticker := time.NewTicker(5 * time.Second)
+	var lastRecieved time.Time
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case <-ticker.C:
+			log.Printf("ticker log - latest UDP packet received: %s\n", lastRecieved.Format("2006-01-02 15:04:05"))
 		default:
 			buffer := make([]byte, 512)
 			udpServer.SetDeadline(time.Now().Add(time.Second))
@@ -128,8 +132,9 @@ func (s *Server) startUDPListener(ctx context.Context) error {
 					log.Printf("server decode error: %s\n", err.Error())
 					continue
 				}
-				log.Printf("%d bytes (Type: %s) read from %s with delay %s (Sent: %d) (Now: %d)\n", numRead, packet.StateType, addr.String(), time.Since(packet.SentAt).String(), packet.SentAt, time.Now())
+				//log.Printf("%d bytes (Type: %s) read from %s with delay %s (Sent: %d) (Now: %d)\n", numRead, packet.StateType, addr.String(), time.Since(packet.SentAt).String(), packet.SentAt, time.Now())
 				s.latestState.Set(packet.State)
+				lastRecieved = time.Now()
 			}
 		}
 	}
