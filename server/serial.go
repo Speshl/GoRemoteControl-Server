@@ -19,6 +19,8 @@ func (s *Server) startSerial(ctx context.Context) error {
 		return err
 	}
 
+	log.Printf("starting serial workers on %s", *s.serialPort)
+
 	errGroup, ctx := errgroup.WithContext(ctx)
 
 	errGroup.Go(func() error {

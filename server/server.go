@@ -90,7 +90,11 @@ func (s *Server) RunServer(ctx context.Context) error {
 func (s *Server) startUDPListener(ctx context.Context) error {
 	log.Printf("starting UDP listener on port %s...", s.address)
 	defer log.Println("stopping UDP listener")
-	udpServer, err := net.ListenPacket("udp", s.address)
+	addr := net.UDPAddr{
+		Port: 1053,
+		IP:   net.ParseIP("0.0.0.0"),
+	}
+	udpServer, err := net.ListenUDP("udp", &addr)
 	if err != nil {
 		return err
 	}
@@ -108,7 +112,7 @@ func (s *Server) startUDPListener(ctx context.Context) error {
 		default:
 			buffer := make([]byte, 512)
 			udpServer.SetDeadline(time.Now().Add(time.Second))
-			numRead, _, err := udpServer.ReadFrom(buffer)
+			numRead, _, err := udpServer.ReadFromUDP(buffer)
 			if err != nil {
 				if !errors.Is(err, os.ErrDeadlineExceeded) {
 					log.Printf("server read error: %s\n", err.Error())
@@ -124,7 +128,7 @@ func (s *Server) startUDPListener(ctx context.Context) error {
 					log.Printf("server decode error: %s\n", err.Error())
 					continue
 				}
-				//log.Printf("%d bytes (Type: %s) read from %s with delay %s\n", numRead, packet.StateType, addr.String(), time.Since(packet.SentAt).String())
+				log.Printf("%d bytes (Type: %s) read from %s with delay %s\n", numRead, packet.StateType, addr.String(), time.Since(packet.SentAt).String())
 				s.latestState.Set(packet.State)
 			}
 		}
