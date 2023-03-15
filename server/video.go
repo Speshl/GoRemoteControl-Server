@@ -50,12 +50,7 @@ func (s *Server) startVideoCapture(ctx context.Context) error {
 	)
 
 	frames := camera.GetOutput()
-
-	err = camera.Stop()
-	if err != nil {
-		return err
-	}
-	log.Printf("camera started successfully, now waiting for client")
+	log.Printf("camera started successfully")
 	for {
 		select {
 		case <-ctx.Done():
