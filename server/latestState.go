@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/Speshl/GoRemoteControl/models"
+	"github.com/Speshl/GoRemoteControl_Server/models"
 )
 
 type LatestState struct {
