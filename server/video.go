@@ -60,16 +60,6 @@ func (s *Server) startVideoCapture(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-s.stopChannel:
-			err = camera.Stop()
-			if err != nil {
-				return err
-			}
-		case <-s.startChannel:
-			err = camera.Start(ctx)
-			if err != nil && err.Error() != "device: stream already started" {
-				return err
-			}
 		case frame, ok := <-frames:
 			if !ok { //channel closed
 				return nil
@@ -93,7 +83,6 @@ func (s *Server) startVideoServer(ctx context.Context) error {
 
 func (s *Server) streamVideo(w http.ResponseWriter, req *http.Request) {
 	log.Println("got stream request")
-	s.connectChannel <- struct{}{}
 
 	mimeWriter := multipart.NewWriter(w)
 	w.Header().Set("Content-Type", fmt.Sprintf("multipart/x-mixed-replace; boundary=%s", mimeWriter.Boundary()))
@@ -105,7 +94,6 @@ func (s *Server) streamVideo(w http.ResponseWriter, req *http.Request) {
 	for {
 		select {
 		case <-ctx.Done():
-			s.disconnectChannel <- struct{}{}
 			return
 		case <-ticker.C:
 			frame, err := s.latestFrame.Get()
@@ -149,27 +137,5 @@ func (s *Server) servePage(w http.ResponseWriter, r *http.Request) {
 	err = t.Execute(w, pd)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-func (s *Server) startClientCounter(ctx context.Context) {
-	numClients := 0
-	cameraStarted := false
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-s.connectChannel:
-			numClients++
-		case <-s.disconnectChannel:
-			numClients--
-		}
-
-		if cameraStarted && numClients <= 0 {
-			s.stopChannel <- struct{}{} //turn off camera
-			cameraStarted = !cameraStarted
-		} else if !cameraStarted && numClients > 0 {
-			s.startChannel <- struct{}{} //turn on camera
-		}
 	}
 }
