@@ -6,16 +6,18 @@ import (
 
 type GroundState struct {
 	State
-	Steer     int
-	Gas       int
-	Brake     int
-	Clutch    int
-	HandBrake int
-	Pan       int
-	Tilt      int
-	Gear      int
-	NumGears  int
-	Aux       [8]bool
+	Steer          int
+	Gas            int
+	Brake          int
+	Clutch         int
+	HandBrake      int
+	Pan            int
+	Tilt           int
+	Gear           int
+	NumGears       int
+	Aux            [8]bool
+	InvertSteering bool
+	InvertEsc      bool
 }
 
 func (s GroundState) GetType() ControlSchema {
@@ -25,39 +27,48 @@ func (s GroundState) GetType() ControlSchema {
 func (s GroundState) GetBytes() []byte {
 	baseMin := -32768
 	baseMax := 32768
-	servoMin := byte(0)
-	servoMax := byte(180)
+	servoMin := 0
+	servoMax := 180
 	servoMid := servoMax / 2
 	returnBytes := make([]byte, 4)
 
 	returnBytes[0] = mapToRange(s.Steer, baseMin, baseMax, servoMin, servoMax) // steering
+	if s.InvertSteering {
+		returnBytes[0] = mapToRange(s.Steer*-1, baseMin, baseMax, servoMin, servoMax) // steering
+	}
+
+	offsetForGear := 0
+	switch s.Gear {
+	case 1:
+		offsetForGear = 10
+	case 2:
+		offsetForGear = 15
+	case 3:
+		offsetForGear = 20
+	case 4:
+		offsetForGear = 30
+	case 5:
+		offsetForGear = 50
+	case 6:
+		offsetForGear = 90
+	default:
+		offsetForGear = 0
+	}
+
+	gasValue := mapToRange(s.Gas, baseMin, baseMax, servoMid, servoMid+offsetForGear)
 	brakeValue := mapToRange(s.Brake*-1, baseMin, baseMax, servoMin, servoMid)
 	clutchValue := mapToRange(s.Clutch, baseMin, baseMax, servoMin, servoMax)
+	if s.InvertEsc {
+		gasValue = mapToRange(s.Gas*-1, baseMin, baseMax, servoMin+offsetForGear, servoMid)
+		brakeValue = mapToRange(s.Brake, baseMin, baseMax, servoMid, servoMax)
+	}
 
-	if brakeValue < servoMid {
+	if brakeValue != byte(servoMid) {
 		returnBytes[1] = brakeValue
-	} else if s.Gas > baseMin {
-		maxForGear := 90
-		switch s.Gear {
-		case 1:
-			maxForGear = int(servoMid) + 10
-		case 2:
-			maxForGear = int(servoMid) + 15
-		case 3:
-			maxForGear = int(servoMid) + 20
-		case 4:
-			maxForGear = int(servoMid) + 30
-		case 5:
-			maxForGear = int(servoMid) + 50
-		case 6:
-			maxForGear = int(servoMax)
-		default:
-			maxForGear = int(servoMid)
-		}
-
-		returnBytes[1] = mapToRange(s.Gas, baseMin, baseMax, servoMid, byte(maxForGear))
+	} else if gasValue != byte(servoMid) {
+		returnBytes[1] = gasValue
 	} else {
-		returnBytes[1] = servoMid
+		returnBytes[1] = byte(servoMid)
 	}
 
 	if clutchValue > 10 { //clutch overrides
@@ -85,6 +96,6 @@ func (s GroundState) GetBytes() []byte {
 	return returnBytes
 }
 
-func mapToRange(value int, min int, max int, minReturn byte, maxReturn byte) byte {
+func mapToRange(value int, min int, max int, minReturn int, maxReturn int) byte {
 	return byte(int(maxReturn-minReturn)*(value-min)/(max-min) + int(minReturn))
 }
