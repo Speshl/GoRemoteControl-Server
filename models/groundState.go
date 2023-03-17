@@ -31,13 +31,12 @@ func (s GroundState) GetBytes() []byte {
 	returnBytes := make([]byte, 4)
 
 	returnBytes[0] = mapToRange(s.Steer, baseMin, baseMax, servoMin, servoMax) // steering
-	gasValue := mapToRange(s.Gas, baseMin, baseMax, servoMid, servoMax)
 	brakeValue := mapToRange(s.Brake*-1, baseMin, baseMax, servoMin, servoMid)
 	clutchValue := mapToRange(s.Clutch, baseMin, baseMax, servoMin, servoMax)
 
 	if brakeValue < servoMid {
 		returnBytes[1] = brakeValue
-	} else if gasValue > servoMid {
+	} else if s.Gas > baseMin {
 		maxForGear := 90
 		switch s.Gear {
 		case 1:
@@ -56,11 +55,7 @@ func (s GroundState) GetBytes() []byte {
 			maxForGear = int(servoMid)
 		}
 
-		if gasValue > byte(maxForGear) {
-			returnBytes[1] = byte(maxForGear)
-		} else {
-			returnBytes[1] = gasValue
-		}
+		returnBytes[1] = mapToRange(s.Gas, baseMin, baseMax, servoMid, byte(maxForGear))
 	} else {
 		returnBytes[1] = servoMid
 	}
