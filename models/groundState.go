@@ -37,41 +37,27 @@ func (s GroundState) GetBytes() []byte {
 		returnBytes[0] = mapToRange(s.Steer*-1, baseMin, baseMax, servoMin, servoMax) // steering
 	}
 
-	offsetForGear := 0
-	switch s.Gear {
-	case 1:
-		offsetForGear = 10
-	case 2:
-		offsetForGear = 15
-	case 3:
-		offsetForGear = 20
-	case 4:
-		offsetForGear = 30
-	case 5:
-		offsetForGear = 50
-	case 6:
-		offsetForGear = 90
-	default:
-		offsetForGear = 0
+	offsetPerGear := 90 / s.NumGears
+	gearOffset := offsetPerGear * s.Gear
+	if s.Gear == s.NumGears {
+		gearOffset = 90
 	}
 
-	gasValue := mapToRange(s.Gas, baseMin, baseMax, servoMid, servoMid+offsetForGear)
+	gasValue := mapToRange(s.Gas, baseMin, baseMax, servoMid, servoMid+gearOffset)
 	brakeValue := mapToRange(s.Brake*-1, baseMin, baseMax, servoMin, servoMid)
 	clutchValue := mapToRange(s.Clutch, baseMin, baseMax, servoMin, servoMax)
 	if s.InvertEsc {
-		gasValue = mapToRange(s.Gas*-1, baseMin, baseMax, servoMin+offsetForGear, servoMid)
+		gasValue = mapToRange(s.Gas*-1, baseMin, baseMax, servoMid-gearOffset, servoMid)
 		brakeValue = mapToRange(s.Brake, baseMin, baseMax, servoMid, servoMax)
 	}
 
 	if brakeValue != byte(servoMid) {
 		returnBytes[1] = brakeValue
+	} else if clutchValue > byte(servoMid) {
+		returnBytes[1] = byte(servoMid)
 	} else if gasValue != byte(servoMid) {
 		returnBytes[1] = gasValue
 	} else {
-		returnBytes[1] = byte(servoMid)
-	}
-
-	if clutchValue > 10 { //clutch overrides
 		returnBytes[1] = byte(servoMid)
 	}
 

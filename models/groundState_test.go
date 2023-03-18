@@ -2,18 +2,150 @@ package models_test
 
 import (
 	"testing"
-	//. "github.com/smartystreets/goconvey/convey"
+
+	"github.com/Speshl/GoRemoteControl_Server/models"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
+type MapTestCase struct {
+	State            models.GroundState
+	ExpectedESc      int
+	ExpectedSteering int
+}
+
 func TestMapRange(t *testing.T) {
-	/*state := models.GroundState{
-		Steer:          32768,
-		Gas:            32768,
-		InvertSteering: true,
-		InvertEsc:      true,
+
+	testCases := []MapTestCase{
+		{
+			State: models.GroundState{ //All pedals full, steering full right
+				Gas:            32768,
+				Steer:          32768,
+				Brake:          32768,
+				Gear:           6,
+				InvertSteering: false,
+				InvertEsc:      false,
+			},
+			ExpectedESc:      0,
+			ExpectedSteering: 180,
+		},
+		{
+			State: models.GroundState{ //No Input
+				Gas:            -32768,
+				Steer:          0,
+				Brake:          -32768,
+				Gear:           6,
+				InvertSteering: false,
+				InvertEsc:      false,
+			},
+			ExpectedESc:      90,
+			ExpectedSteering: 90,
+		},
+		{
+			State: models.GroundState{ //half throttle in 6th gear
+				Gas:            0,
+				Steer:          0,
+				Brake:          -32768,
+				Gear:           6,
+				InvertSteering: false,
+				InvertEsc:      false,
+			},
+			ExpectedESc:      135,
+			ExpectedSteering: 90,
+		},
+		{
+			State: models.GroundState{ //half throttle in 1st
+				Gas:            0,
+				Steer:          0,
+				Brake:          -32768,
+				Gear:           1,
+				InvertSteering: false,
+				InvertEsc:      false,
+			},
+			ExpectedESc:      95,
+			ExpectedSteering: 90,
+		},
+		{
+			State: models.GroundState{ //full throttle in 1st
+				Gas:            32768,
+				Steer:          0,
+				Brake:          -32768,
+				Gear:           1,
+				InvertSteering: false,
+				InvertEsc:      false,
+			},
+			ExpectedESc:      100,
+			ExpectedSteering: 90,
+		},
+
+		//inverted esc
+		{
+			State: models.GroundState{ //All pedals full, steering full right
+				Gas:            32768,
+				Steer:          32768,
+				Brake:          32768,
+				Gear:           6,
+				InvertSteering: false,
+				InvertEsc:      true,
+			},
+			ExpectedESc:      180,
+			ExpectedSteering: 180,
+		},
+		{
+			State: models.GroundState{ //No Input
+				Gas:            -32768,
+				Steer:          0,
+				Brake:          -32768,
+				Gear:           6,
+				InvertSteering: false,
+				InvertEsc:      true,
+			},
+			ExpectedESc:      90,
+			ExpectedSteering: 90,
+		},
+		{
+			State: models.GroundState{ //half throttle in 6th gear
+				Gas:            0,
+				Steer:          0,
+				Brake:          -32768,
+				Gear:           6,
+				InvertSteering: false,
+				InvertEsc:      true,
+			},
+			ExpectedESc:      45,
+			ExpectedSteering: 90,
+		},
+		{
+			State: models.GroundState{ //half throttle in 1st
+				Gas:            0,
+				Steer:          0,
+				Brake:          -32768,
+				Gear:           1,
+				InvertSteering: false,
+				InvertEsc:      true,
+			},
+			ExpectedESc:      85,
+			ExpectedSteering: 90,
+		},
+		{
+			State: models.GroundState{ //full throttle in 1st
+				Gas:            32768,
+				Steer:          0,
+				Brake:          -32768,
+				Gear:           1,
+				InvertSteering: false,
+				InvertEsc:      true,
+			},
+			ExpectedESc:      80,
+			ExpectedSteering: 90,
+		},
 	}
 
-	serialBytes := state.GetBytes()
-	So(serialBytes[0], ShouldEqual, 0)
-	So(serialBytes[0], ShouldEqual, 0)*/
+	for _, testCase := range testCases {
+		Convey("Given a test state", t, func(c C) {
+			bytes := testCase.State.GetBytes()
+			So(bytes[0], ShouldEqual, testCase.ExpectedSteering)
+			So(bytes[1], ShouldEqual, testCase.ExpectedESc)
+		})
+	}
 }
