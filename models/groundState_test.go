@@ -17,7 +17,7 @@ type MapTestCase struct {
 func TestMap(t *testing.T) {
 	testCases := []MapTestCase{
 		{
-			State: GroundState{ //All pedals full, steering full right
+			State: models.GroundState{ //All pedals full, steering full right
 				Gas:            32768,
 				Steer:          32768,
 				Brake:          32768,
@@ -29,7 +29,7 @@ func TestMap(t *testing.T) {
 			ExpectedSteering: 180,
 		},
 		{
-			State: GroundState{ //No Input
+			State: models.GroundState{ //No Input
 				Gas:            -32768,
 				Steer:          0,
 				Brake:          -32768,
@@ -41,7 +41,7 @@ func TestMap(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: GroundState{ //half throttle in 6th gear
+			State: models.GroundState{ //half throttle in 6th gear
 				Gas:            0,
 				Steer:          0,
 				Brake:          -32768,
@@ -53,7 +53,7 @@ func TestMap(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: GroundState{ //half throttle in 1st
+			State: models.GroundState{ //half throttle in 1st
 				Gas:            0,
 				Steer:          0,
 				Brake:          -32768,
@@ -65,7 +65,7 @@ func TestMap(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: GroundState{ //full throttle in 1st
+			State: models.GroundState{ //full throttle in 1st
 				Gas:            32768,
 				Steer:          0,
 				Brake:          -32768,
@@ -79,7 +79,7 @@ func TestMap(t *testing.T) {
 
 		//inverted esc
 		{
-			State: GroundState{ //All pedals full, steering full right
+			State: models.GroundState{ //All pedals full, steering full right
 				Gas:            32768,
 				Steer:          32768,
 				Brake:          32768,
@@ -91,7 +91,7 @@ func TestMap(t *testing.T) {
 			ExpectedSteering: 180,
 		},
 		{
-			State: GroundState{ //No Input
+			State: models.GroundState{ //No Input
 				Gas:            -32768,
 				Steer:          0,
 				Brake:          -32768,
@@ -103,7 +103,7 @@ func TestMap(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: GroundState{ //half throttle in 6th gear
+			State: models.GroundState{ //half throttle in 6th gear
 				Gas:            0,
 				Steer:          0,
 				Brake:          -32768,
@@ -115,7 +115,7 @@ func TestMap(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: GroundState{ //half throttle in 1st
+			State: models.GroundState{ //half throttle in 1st
 				Gas:            0,
 				Steer:          0,
 				Brake:          -32768,
@@ -127,7 +127,7 @@ func TestMap(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: GroundState{ //full throttle in 1st
+			State: models.GroundState{ //full throttle in 1st
 				Gas:            32768,
 				Steer:          0,
 				Brake:          -32768,
