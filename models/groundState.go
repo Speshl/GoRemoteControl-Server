@@ -37,7 +37,12 @@ func (s GroundState) GetBytes() []byte {
 		returnBytes[0] = mapToRange(s.Steer*-1, baseMin, baseMax, servoMin, servoMax) // steering
 	}
 
-	offsetPerGear := 90 / s.NumGears
+	numGears := 6
+	if s.NumGears > 0 {
+		numGears = s.NumGears
+	}
+
+	offsetPerGear := 90 / numGears
 	gearOffset := offsetPerGear * s.Gear
 	if s.Gear == s.NumGears {
 		gearOffset = 90

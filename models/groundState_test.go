@@ -14,11 +14,10 @@ type MapTestCase struct {
 	ExpectedSteering int
 }
 
-func TestMapRange(t *testing.T) {
-
+func TestMap(t *testing.T) {
 	testCases := []MapTestCase{
 		{
-			State: models.GroundState{ //All pedals full, steering full right
+			State: GroundState{ //All pedals full, steering full right
 				Gas:            32768,
 				Steer:          32768,
 				Brake:          32768,
@@ -30,7 +29,7 @@ func TestMapRange(t *testing.T) {
 			ExpectedSteering: 180,
 		},
 		{
-			State: models.GroundState{ //No Input
+			State: GroundState{ //No Input
 				Gas:            -32768,
 				Steer:          0,
 				Brake:          -32768,
@@ -42,7 +41,7 @@ func TestMapRange(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: models.GroundState{ //half throttle in 6th gear
+			State: GroundState{ //half throttle in 6th gear
 				Gas:            0,
 				Steer:          0,
 				Brake:          -32768,
@@ -54,7 +53,7 @@ func TestMapRange(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: models.GroundState{ //half throttle in 1st
+			State: GroundState{ //half throttle in 1st
 				Gas:            0,
 				Steer:          0,
 				Brake:          -32768,
@@ -62,11 +61,11 @@ func TestMapRange(t *testing.T) {
 				InvertSteering: false,
 				InvertEsc:      false,
 			},
-			ExpectedESc:      95,
+			ExpectedESc:      97,
 			ExpectedSteering: 90,
 		},
 		{
-			State: models.GroundState{ //full throttle in 1st
+			State: GroundState{ //full throttle in 1st
 				Gas:            32768,
 				Steer:          0,
 				Brake:          -32768,
@@ -74,13 +73,13 @@ func TestMapRange(t *testing.T) {
 				InvertSteering: false,
 				InvertEsc:      false,
 			},
-			ExpectedESc:      100,
+			ExpectedESc:      105,
 			ExpectedSteering: 90,
 		},
 
 		//inverted esc
 		{
-			State: models.GroundState{ //All pedals full, steering full right
+			State: GroundState{ //All pedals full, steering full right
 				Gas:            32768,
 				Steer:          32768,
 				Brake:          32768,
@@ -92,7 +91,7 @@ func TestMapRange(t *testing.T) {
 			ExpectedSteering: 180,
 		},
 		{
-			State: models.GroundState{ //No Input
+			State: GroundState{ //No Input
 				Gas:            -32768,
 				Steer:          0,
 				Brake:          -32768,
@@ -104,7 +103,7 @@ func TestMapRange(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: models.GroundState{ //half throttle in 6th gear
+			State: GroundState{ //half throttle in 6th gear
 				Gas:            0,
 				Steer:          0,
 				Brake:          -32768,
@@ -116,7 +115,7 @@ func TestMapRange(t *testing.T) {
 			ExpectedSteering: 90,
 		},
 		{
-			State: models.GroundState{ //half throttle in 1st
+			State: GroundState{ //half throttle in 1st
 				Gas:            0,
 				Steer:          0,
 				Brake:          -32768,
@@ -124,11 +123,11 @@ func TestMapRange(t *testing.T) {
 				InvertSteering: false,
 				InvertEsc:      true,
 			},
-			ExpectedESc:      85,
+			ExpectedESc:      82,
 			ExpectedSteering: 90,
 		},
 		{
-			State: models.GroundState{ //full throttle in 1st
+			State: GroundState{ //full throttle in 1st
 				Gas:            32768,
 				Steer:          0,
 				Brake:          -32768,
@@ -136,7 +135,7 @@ func TestMapRange(t *testing.T) {
 				InvertSteering: false,
 				InvertEsc:      true,
 			},
-			ExpectedESc:      80,
+			ExpectedESc:      75,
 			ExpectedSteering: 90,
 		},
 	}
