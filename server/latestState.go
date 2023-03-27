@@ -10,12 +10,12 @@ import (
 type LatestState struct {
 	state models.StateIface
 	used  bool
-	mutex sync.Mutex
+	mutex sync.RWMutex
 }
 
 func (ls *LatestState) Get() (models.StateIface, error) {
-	ls.mutex.Lock()
-	defer ls.mutex.Unlock()
+	ls.mutex.RLock()
+	defer ls.mutex.RUnlock()
 	if ls.used {
 		return nil, fmt.Errorf("state already sent")
 	}

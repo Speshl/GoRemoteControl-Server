@@ -8,12 +8,12 @@ import (
 type LatestFrame struct {
 	frame []byte
 	used  bool
-	mutex sync.Mutex
+	mutex sync.RWMutex
 }
 
 func (lf *LatestFrame) Get() ([]byte, error) {
-	lf.mutex.Lock()
-	defer lf.mutex.Unlock()
+	lf.mutex.RLock()
+	defer lf.mutex.RUnlock()
 	if lf.used {
 		return nil, fmt.Errorf("frame already sent")
 	}

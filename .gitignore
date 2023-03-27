@@ -3,4 +3,4 @@ vendor/
 build/
 notes.txt
 GoRemoteControl_Server
-pi_compose.yml
+*_compose.yml
